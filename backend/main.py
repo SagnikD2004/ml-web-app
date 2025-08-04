@@ -26,7 +26,7 @@ async def predict_image(request: Request):
         # Predict
         predictions = model.predict(img_array)
         predicted_class = class_name[np.argmax(predictions[0])]
-        confidence = round(100 * np.max(predictions[0]), 2)
+        confidence = float(round(100 * np.max(predictions[0]), 2))
 
         return JSONResponse(content={
             "class": predicted_class,
