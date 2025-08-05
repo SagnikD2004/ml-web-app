@@ -7,18 +7,20 @@ export default function UploadPage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [analysisResult, setAnalysisResult] = useState<{
+    label: string;
+    confidence: number;
+  } | null>(null);
 
   const MAX_FILE_SIZE_MB = 2;
-  const ALLOWED_EXTENSIONS = ["jpg", "jpeg", "png", "gif"];
+  const ALLOWED_EXTENSIONS = ["jpg", "jpeg", "png"];
 
   const isValidFile = (file: File): boolean => {
     const fileSizeMB = file.size / (1024 * 1024);
     const fileExtension = file.name.split(".").pop()?.toLowerCase();
 
     if (!fileExtension || !ALLOWED_EXTENSIONS.includes(fileExtension)) {
-      setErrorMessage(
-        "Invalid file type. Only JPG or PNG images are allowed."
-      );
+      setErrorMessage("Invalid file type. Only JPG or PNG images are allowed.");
       return false;
     }
 
@@ -29,7 +31,7 @@ export default function UploadPage() {
       return false;
     }
 
-    setErrorMessage(null); 
+    setErrorMessage(null);
     return true;
   };
 
@@ -78,11 +80,10 @@ export default function UploadPage() {
       const data = await res.json();
       if (data.error) throw new Error(data.error);
 
-      console.log(data.result);
-      alert("Image uploaded successfully");
-      alert(
-        `Prediction: ${data.result.label}, Confidence: ${data.result.confidence}`
-      );
+      setAnalysisResult({
+        label: data.result.label,
+        confidence: data.result.confidence,
+      });
     } catch (err) {
       console.error(err);
       alert("Upload failed");
@@ -158,24 +159,41 @@ export default function UploadPage() {
             width={300}
             className="border rounded shadow mb-2 object-contain"
           />
-          <button
-            onClick={() => {
-              setSelectedFile(null);
-              setPreviewUrl(null);
-            }}
-            className="text-sm border-black bg-gray-200 hover:bg-gray-300 px-5 py-2 rounded-lg mt-3"
-          >
-            Remove Image
-          </button>
+
+          {!analysisResult && (
+            <button
+              onClick={() => {
+                setSelectedFile(null);
+                setPreviewUrl(null);
+              }}
+              className="text-sm border-black bg-gray-200 hover:bg-gray-300 px-5 py-2 rounded-lg mt-3"
+            >
+              Remove Image
+            </button>
+          )}
         </div>
       )}
 
-      <button
-        onClick={handleUpload}
-        className="mt-4 px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-      >
-        Submit
-      </button>
+      {previewUrl && !analysisResult && (
+        <button
+          onClick={handleUpload}
+          className="mt-4 px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+        >
+          Submit
+        </button>
+      )}
+
+      {analysisResult && (
+        <div className="mt-4 p-4 border rounded shadow bg-white text-center">
+          <h2 className="text-lg font-semibold">Prediction Result</h2>
+          <p className="mt-2">
+            <strong>Label:</strong> {analysisResult.label}
+          </p>
+          <p>
+            <strong>Confidence:</strong> {analysisResult.confidence.toFixed(2)}
+          </p>
+        </div>
+      )}
     </div>
   );
 }
