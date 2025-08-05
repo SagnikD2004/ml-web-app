@@ -81,7 +81,7 @@ export default function UploadPage() {
       if (data.error) throw new Error(data.error);
 
       setAnalysisResult({
-        label: data.result.label,
+        label: data.result.class,
         confidence: data.result.confidence,
       });
     } catch (err) {
