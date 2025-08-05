@@ -14,7 +14,7 @@ export async function POST(req: Request) {
     const response = await fetch("http://localhost:5000/predict", {
       method: "POST",
       headers: {
-        "Content-Type": file.type,
+        "Content-Type": "application/octet-stream",
       },
       body: buffer,
     });
